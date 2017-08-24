@@ -18,6 +18,9 @@ http://bazaar.launchpad.net/+branch/mgo/v2/view/head:/txn/tarjan.go
 
 Gustavo Niemeyer: http://labix.org
 
+Modified by Sam Kleinman (tychoish) to use strings to identify graph
+nodes for id's rather than `interfaces{}`.
+
 For API docs and examples see http://godoc.org/github.com/looplab/tarjan
 
 
@@ -40,7 +43,6 @@ fmt.Println(output)
 // Output:
 // [[3 2 1] [7 6] [5 4] [8]]
 ```
-
 
 # License
 

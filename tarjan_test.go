@@ -23,63 +23,15 @@ import (
 )
 
 func TestTypeString(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
-	graph["1"] = []interface{}{"2"}
-	graph["2"] = []interface{}{"3"}
-	graph["3"] = []interface{}{"1"}
-	graph["4"] = []interface{}{"2", "3", "5"}
-	graph["5"] = []interface{}{"4", "6"}
-	graph["6"] = []interface{}{"3", "7"}
-	graph["7"] = []interface{}{"6"}
-	graph["8"] = []interface{}{"5", "7", "8"}
-
-	o := Connections(graph)
-	output := sortConnections(o)
-	exp := [][]string{
-		{"1", "2", "3"},
-		{"6", "7"},
-		{"4", "5"},
-		{"8"},
-	}
-	if !reflect.DeepEqual(output, exp) {
-		t.Fatalf("FAIL.\nexp=%v\ngot=%v\n", exp, output)
-	}
-}
-
-func TestTypeInt(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
-	graph[1] = []interface{}{2}
-	graph[2] = []interface{}{3}
-	graph[3] = []interface{}{1}
-	graph[4] = []interface{}{2, 3, 5}
-	graph[5] = []interface{}{4, 6}
-	graph[6] = []interface{}{3, 7}
-	graph[7] = []interface{}{6}
-	graph[8] = []interface{}{5, 7, 8}
-
-	o := Connections(graph)
-	output := sortConnections(o)
-	exp := [][]string{
-		{"1", "2", "3"},
-		{"6", "7"},
-		{"4", "5"},
-		{"8"},
-	}
-	if !reflect.DeepEqual(output, exp) {
-		t.Fatalf("FAIL.\nexp=%v\ngot=%v\n", exp, output)
-	}
-}
-
-func TestTypeMixed(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
-	graph[1] = []interface{}{2}
-	graph[2] = []interface{}{"3"}
-	graph["3"] = []interface{}{1}
-	graph[4] = []interface{}{2, "3", 5}
-	graph[5] = []interface{}{4, "6"}
-	graph["6"] = []interface{}{"3", 7}
-	graph[7] = []interface{}{"6"}
-	graph[8] = []interface{}{5, 7, 8}
+	graph := make(map[string][]string)
+	graph["1"] = []string{"2"}
+	graph["2"] = []string{"3"}
+	graph["3"] = []string{"1"}
+	graph["4"] = []string{"2", "3", "5"}
+	graph["5"] = []string{"4", "6"}
+	graph["6"] = []string{"3", "7"}
+	graph["7"] = []string{"6"}
+	graph["8"] = []string{"5", "7", "8"}
 
 	o := Connections(graph)
 	output := sortConnections(o)
@@ -95,7 +47,7 @@ func TestTypeMixed(t *testing.T) {
 }
 
 func TestEmptyGraph(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
+	graph := make(map[string][]string)
 
 	output := Connections(graph)
 	if len(output) != 0 {
@@ -104,8 +56,8 @@ func TestEmptyGraph(t *testing.T) {
 }
 
 func TestSingleVertex(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
-	graph["1"] = []interface{}{}
+	graph := make(map[string][]string)
+	graph["1"] = []string{}
 
 	o := Connections(graph)
 	output := sortConnections(o)
@@ -115,8 +67,8 @@ func TestSingleVertex(t *testing.T) {
 }
 
 func TestSingleVertexLoop(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
-	graph["1"] = []interface{}{"1"}
+	graph := make(map[string][]string)
+	graph["1"] = []string{"1"}
 
 	o := Connections(graph)
 	output := sortConnections(o)
@@ -126,10 +78,10 @@ func TestSingleVertexLoop(t *testing.T) {
 }
 
 func TestMultipleVertexLoop(t *testing.T) {
-	graph := make(map[interface{}][]interface{})
-	graph["1"] = []interface{}{"2"}
-	graph["2"] = []interface{}{"3"}
-	graph["3"] = []interface{}{"1"}
+	graph := make(map[string][]string)
+	graph["1"] = []string{"2"}
+	graph["2"] = []string{"3"}
+	graph["3"] = []string{"1"}
 
 	o := Connections(graph)
 	output := sortConnections(o)
@@ -145,15 +97,15 @@ func TestMultipleVertexLoop(t *testing.T) {
 }
 
 func ExampleConnections() {
-	graph := make(map[interface{}][]interface{})
-	graph["1"] = []interface{}{"2"}
-	graph["2"] = []interface{}{"3"}
-	graph["3"] = []interface{}{"1"}
-	graph["4"] = []interface{}{"2", "3", "5"}
-	graph["5"] = []interface{}{"4", "6"}
-	graph["6"] = []interface{}{"3", "7"}
-	graph["7"] = []interface{}{"6"}
-	graph["8"] = []interface{}{"5", "7", "8"}
+	graph := make(map[string][]string)
+	graph["1"] = []string{"2"}
+	graph["2"] = []string{"3"}
+	graph["3"] = []string{"1"}
+	graph["4"] = []string{"2", "3", "5"}
+	graph["5"] = []string{"4", "6"}
+	graph["6"] = []string{"3", "7"}
+	graph["7"] = []string{"6"}
+	graph["8"] = []string{"5", "7", "8"}
 
 	o := Connections(graph)
 	output := sortConnections(o)
@@ -163,22 +115,11 @@ func ExampleConnections() {
 	// [[1 2 3] [6 7] [4 5] [8]]
 }
 
-func sortConnections(connections [][]interface{}) [][]string {
+func sortConnections(connections [][]string) [][]string {
 	out := make([][]string, 0, len(connections))
 	for _, cons := range connections {
-		slice := make([]string, 0, len(cons))
-		for _, v := range cons {
-			switch v := v.(type) {
-			case string:
-				slice = append(slice, v)
-			case int:
-				slice = append(slice, fmt.Sprintf("%d", v))
-			default:
-				panic(fmt.Errorf("invalid type [%T]", v))
-			}
-		}
-		sort.Strings(slice)
-		out = append(out, slice)
+		sort.Strings(cons)
+		out = append(out, cons)
 	}
 	return out
 }
